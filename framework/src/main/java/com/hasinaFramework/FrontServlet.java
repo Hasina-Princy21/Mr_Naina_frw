@@ -34,8 +34,7 @@ public class FrontServlet extends HttpServlet{
         try {
             if (dispatcherServlet.containsPath(path)) {
                 res.getWriter().write(
-                    " class: " + cls.getSimpleName() +
-                    " method: " + method.getName() 
+                    "hello"
                 );
             } else {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND, "No handler found for " + path);
