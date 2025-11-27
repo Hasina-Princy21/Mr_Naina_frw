@@ -8,6 +8,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class FrontServlet extends HttpServlet{
+    private DispatcherServlet dispatcherServlet;
+
+    @Override
+    public void init() throws ServletException {
+        try {
+            dispatcherServlet = new DispatcherServlet("com.hasinaFramework");
+        } catch (Exception e) {
+            throw new ServletException("Failed to initialize DispatcherServlet", e);
+        }
+    }
+
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws IOException, ServletException {
@@ -16,8 +27,21 @@ public class FrontServlet extends HttpServlet{
         String contextPath = req.getContextPath();
         String path = uri.substring(contextPath.length());
 
-        res.setContentType("text/plain");
-        res.getWriter().write("Url: " + path);
+        Class<?> cls = dispatcherServlet.getClass(path);
+
+        try {
+            if (dispatcherServlet.containsPath(path)) {
+                Object result = dispatcherServlet.invoke(path); 
+                res.getWriter().write(
+                    cls +
+                    " value: " + result.toString()
+                );
+            } else {
+                res.sendError(HttpServletResponse.SC_NOT_FOUND, "No handler found for " + path);
+            }
+        } catch (Exception e) {
+            throw new ServletException("Error processing request for " + path, e);
+        }
 
     }
 }

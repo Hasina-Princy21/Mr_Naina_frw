@@ -1,1 +1,6 @@
 com\hasinaFramework\FrontServlet.class
+com\hasinaFramework\DispatcherServlet.class
+com\hasinaFramework\TestController.class
+com\hasinaFramework\EtudiantController.class
+com\hasinaFramework\UrlServlet.class
+com\hasinaFramework\Controller.class
