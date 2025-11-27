@@ -1,8 +1,24 @@
 set ABSOLUE=.
+set RETOUR=..\
 set PATH_WAR=%ABSOLUE%\target
-SET PATH_TOMCAT=C:\apache-tomcat-10.1.49
+set PATH_TOMCAT=C:\apache-tomcat-10.1.49
+set PATH_JAR=%RETOUR%\framework\target
+set PATH_TEST=%ABSOLUE%\src\main\webapp\WEB-INF\lib
 
 @echo off
+echo ======================
+echo COPIE DU FRAMEWORK JAR
+echo ======================
+REM
+if exist "%PATH_JAR%\framework-1.0-SNAPSHOT.jar" (
+    echo Le JAR du framework existe, remplacement...
+    cmd /c copy /Y "%PATH_JAR%\framework-1.0-SNAPSHOT.jar" "%PATH_TEST%"
+) else (
+    echo ERREUR : Le fichier JAR du framework est introuvable !
+    pause
+    exit /b 1
+)
+
 echo =====================
 echo COMPILATION DU PROJET
 echo =====================
