@@ -1,6 +1,7 @@
 package com.hasinaFramework;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -28,13 +29,15 @@ public class FrontServlet extends HttpServlet{
         String path = uri.substring(contextPath.length());
 
         Class<?> cls = dispatcherServlet.getClass(path);
+        Method method = dispatcherServlet.getMethod(path);
 
         try {
             if (dispatcherServlet.containsPath(path)) {
-                Object result = dispatcherServlet.invoke(path); 
+                // Object result = dispatcherServlet.invoke(path); 
                 res.getWriter().write(
-                    cls +
-                    " value: " + result.toString()
+                    " class: " + cls.getSimpleName() +
+                    " method: " + method.getName() 
+                    // " value: " + result.toString()
                 );
             } else {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND, "No handler found for " + path);
