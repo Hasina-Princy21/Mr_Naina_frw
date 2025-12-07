@@ -40,16 +40,11 @@ public class FrontServlet extends HttpServlet{
                 if (result instanceof ModelVue) {
                     ModelVue mv = (ModelVue) result;
                     mv.getData().forEach(req::setAttribute);
-
-                    // res.getWriter().write("Vue :" + mv.getPath() + mv.getVue());
-                    // Forward vers la vue correspondante
                     req.getRequestDispatcher(mv.getVue())
                     .forward(req, res);
 
                     return;
                 }else{
-                    // req.getRequestDispatcher("WEB-INF/views/listeEtudiants.jsp")
-                    // .forward(req, res);
                     res.getWriter().write(
                         " class: " + cls.getSimpleName() +
                         " method: " + method.getName() +
