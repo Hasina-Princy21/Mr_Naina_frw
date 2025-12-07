@@ -7,7 +7,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.annotation.WebServlet;
 
+@WebServlet("/")
 public class FrontServlet extends HttpServlet{
     private DispatcherServlet dispatcherServlet;
 
@@ -33,12 +35,27 @@ public class FrontServlet extends HttpServlet{
 
         try {
             if (dispatcherServlet.containsPath(path)) {
-                Object result = dispatcherServlet.invoke(path); 
-                res.getWriter().write(
-                    " class: " + cls.getSimpleName() +
-                    " method: " + method.getName() +
-                    " value: " + result.toString()
-                );
+                Object result = dispatcherServlet.invoke(path);
+                
+                if (result instanceof ModelVue) {
+                    ModelVue mv = (ModelVue) result;
+                    mv.getData().forEach(req::setAttribute);
+
+                    // res.getWriter().write("Vue :" + mv.getPath() + mv.getVue());
+                    // Forward vers la vue correspondante
+                    req.getRequestDispatcher(mv.getVue())
+                    .forward(req, res);
+
+                    return;
+                }else{
+                    // req.getRequestDispatcher("WEB-INF/views/listeEtudiants.jsp")
+                    // .forward(req, res);
+                    res.getWriter().write(
+                        " class: " + cls.getSimpleName() +
+                        " method: " + method.getName() +
+                        " value: " + result.toString()
+                    );
+                }
             } else {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND, "No handler found for " + path);
             }
