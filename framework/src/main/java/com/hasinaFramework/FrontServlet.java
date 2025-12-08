@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@WebServlet("/")
 public class FrontServlet extends HttpServlet{
     private DispatcherServlet dispatcherServlet;
 
@@ -34,11 +36,19 @@ public class FrontServlet extends HttpServlet{
         try {
             if (dispatcherServlet.containsPath(path)) {
                 Object result = dispatcherServlet.invoke(path); 
-                res.getWriter().write(
-                    " class: " + cls.getSimpleName() +
-                    " method: " + method.getName() +
-                    " value: " + result.toString()
-                );
+                if (result instanceof ModelVue) {
+                    ModelVue mv = (ModelVue) result;
+                    mv.getData().forEach(req::setAttribute);
+                    req.getRequestDispatcher(mv.getVue())
+                    .forward(req, res);
+                    return;
+                }else{
+                    res.getWriter().write(
+                        " class: " + cls.getSimpleName() +
+                        " method: " + method.getName() +
+                        " value: " + result.toString()
+                    );
+                }
             } else {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND, "No handler found for " + path);
             }
