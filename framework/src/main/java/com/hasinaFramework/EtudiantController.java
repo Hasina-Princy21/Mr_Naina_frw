@@ -10,6 +10,4 @@ public class EtudiantController {
         mv.addData("message", "Bienvenue dans la liste");
         return mv;
     }
-
-
 }

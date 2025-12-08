@@ -1,14 +1,4 @@
-# Maven
-target/
-
-# Java
+/framework/target/
+/test/target/
 *.class
 *.jar
-
-# Logs
-*.log
-
-# IDE
-.idea/
-*.iml
-.vscode/
