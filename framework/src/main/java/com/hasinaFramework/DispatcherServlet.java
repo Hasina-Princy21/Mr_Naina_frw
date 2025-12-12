@@ -6,9 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import org.reflections.Reflections;
 
-import jakarta.servlet.annotation.WebServlet;
-
-@WebServlet("/")
 public class DispatcherServlet {
 
     private final Map<String, Method> urlMapping = new HashMap<>();
