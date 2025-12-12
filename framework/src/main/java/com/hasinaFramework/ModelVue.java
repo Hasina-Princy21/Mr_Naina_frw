@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelVue {
-        private String vue;
+    private String vue;
     private Map<String, Object> data;
 
     public ModelVue(String vue) {
@@ -35,4 +35,6 @@ public class ModelVue {
     public void addData(String key, Object value){
         this.data.put(key, value);
     }
+
+
 }

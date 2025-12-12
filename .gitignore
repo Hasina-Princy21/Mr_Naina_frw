@@ -1,0 +1,4 @@
+/framework/target/
+/test/target/
+*.class
+*.jar

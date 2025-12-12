@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet("/")
 public class FrontServlet extends HttpServlet{
@@ -35,7 +36,8 @@ public class FrontServlet extends HttpServlet{
 
         try {
             if (dispatcherServlet.containsPath(path)) {
-                Object result = dispatcherServlet.invoke(path); 
+                Object result = dispatcherServlet.invoke(path);
+                
                 if (result instanceof ModelVue) {
                     ModelVue mv = (ModelVue) result;
                     mv.getData().forEach(req::setAttribute);
