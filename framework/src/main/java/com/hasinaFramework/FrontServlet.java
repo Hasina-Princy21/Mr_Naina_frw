@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +43,6 @@ public class FrontServlet extends HttpServlet{
                     mv.getData().forEach(req::setAttribute);
                     req.getRequestDispatcher(mv.getVue())
                     .forward(req, res);
-
                     return;
                 }else{
                     res.getWriter().write(
