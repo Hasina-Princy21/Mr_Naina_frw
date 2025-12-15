@@ -9,8 +9,9 @@ import org.reflections.Reflections;
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.UrlServlet;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
 
+@WebServlet("/")
 public class DispatcherServlet {
 
     private final Map<String, Method> urlMapping = new HashMap<>();
