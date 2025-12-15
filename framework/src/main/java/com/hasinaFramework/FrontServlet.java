@@ -35,7 +35,7 @@ public class FrontServlet extends HttpServlet{
 
         try {
             if (dispatcherServlet.containsPath(path)) {
-                Object result = dispatcherServlet.invoke(path);
+                Object result = dispatcherServlet.invoke(path, req);
                 
                 if (result instanceof ModelVue) {
                     ModelVue mv = (ModelVue) result;
@@ -47,7 +47,7 @@ public class FrontServlet extends HttpServlet{
                     res.getWriter().write(
                         " class: " + cls.getSimpleName() +
                         " method: " + method.getName() +
-                        " value: " + result.toString()
+                        " value: " + result.toString() 
                     );
                 }
             } else {

@@ -1,4 +1,8 @@
-package com.hasinaFramework;
+package com.hasinaFramework.controller;
+
+import com.hasinaFramework.ModelVue;
+import com.hasinaFramework.annotation.Controller;
+import com.hasinaFramework.annotation.UrlServlet;
 
 @Controller
 public class EtudiantController {
@@ -10,4 +14,10 @@ public class EtudiantController {
         mv.addData("message", "Bienvenue dans la liste");
         return mv;
     }
+
+    // @UrlServlet("/etudiant")
+    // public String getEtudiantById(int id){
+    //     return "id : " + id;
+    // }
+    
 }
