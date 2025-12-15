@@ -1,4 +1,4 @@
-package com.hasinaFramework;
+package com.hasinaFramework.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
