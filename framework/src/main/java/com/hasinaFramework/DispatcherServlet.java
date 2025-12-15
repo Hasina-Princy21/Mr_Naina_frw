@@ -7,11 +7,12 @@ import java.util.Map;
 import java.util.Set;
 import org.reflections.Reflections;
 import com.hasinaFramework.annotation.Controller;
+import com.hasinaFramework.annotation.RequestParam;
 import com.hasinaFramework.annotation.UrlServlet;
 
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 
-@WebServlet("/")
+
 public class DispatcherServlet {
 
     private final Map<String, Method> urlMapping = new HashMap<>();
@@ -43,7 +44,10 @@ public class DispatcherServlet {
             Object[] arg = new Object[parameters.length];
 
             for (int i = 0; i < arg.length; i++) {
-                String res = request.getParameter(parameters[i].getName());
+                Parameter p = parameters[i];
+                RequestParam rp = p.getAnnotation(RequestParam.class);
+                String paramName = rp != null ? rp.value() : p.getName(); 
+                String res = request.getParameter(paramName);
                 if (parameters[i].getType() == String.class) {
                     arg[i]=(String) res;
                 }
