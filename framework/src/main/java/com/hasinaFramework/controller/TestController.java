@@ -15,4 +15,9 @@ public class TestController {
     public String helloMethod(@RequestParam("prenom") String nom) {
         return "Hello " + nom;
     }
+
+    @UrlServlet("/hello/{id}")
+    public String helloMethod(int id) {
+        return "Hello " + id;
+    }
 }
