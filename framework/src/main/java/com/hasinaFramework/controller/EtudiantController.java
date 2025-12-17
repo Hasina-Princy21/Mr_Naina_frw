@@ -15,9 +15,9 @@ public class EtudiantController {
         return mv;
     }
 
-    // @UrlServlet("/etudiant")
-    // public String getEtudiantById(int id){
-    //     return "id : " + id;
-    // }
+    @UrlServlet("/etudiant/{id}")
+    public String getEtudiantById(int id){
+        return "id : " + id;
+    }
     
 }
