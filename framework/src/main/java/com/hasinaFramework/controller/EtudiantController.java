@@ -4,9 +4,8 @@ import com.hasinaFramework.model.Etudiant;
 import com.hasinaFramework.ModelVue;
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
+import com.hasinaFramework.annotation.JsonResponse;
 import com.hasinaFramework.annotation.PostMapping;
-import com.hasinaFramework.annotation.RequestParam;
-// import com.hasinaFramework.annotation.UrlServlet;
 
 @Controller
 public class EtudiantController {
@@ -30,6 +29,13 @@ public class EtudiantController {
         return 
             "Nom: " + etudiant.getNom() + 
             ", Prenom: " + etudiant.getPrenom();
+    }
+
+    @GetMapping("/api/etudiants")
+    @JsonResponse
+    public Etudiant getEtudiantJson() {
+        Etudiant e = new Etudiant("Rakoto", "Jean");
+        return e;
     }
     
 }
