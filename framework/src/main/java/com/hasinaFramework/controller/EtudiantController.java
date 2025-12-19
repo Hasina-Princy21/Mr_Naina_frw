@@ -1,5 +1,7 @@
 package com.hasinaFramework.controller;
 
+import java.util.Map;
+
 import com.hasinaFramework.ModelVue;
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
@@ -18,9 +20,24 @@ public class EtudiantController {
         return mv;
     }
 
-    // @UrlServlet("/etudiant")
-    // public String getEtudiantById(int id){
-    //     return "id : " + id;
-    // }
+    @GetMapping("/etudiant")
+    public ModelVue formEtudiant(){
+        ModelVue mv = new ModelVue("formEtudiant.jsp");
+        return mv;
+    }
+
+    @PostMapping("/etu/save")
+    public String save (Map<String, String> params) {
+        String nom = params.get("nom");
+        return "Nom: " + nom ;
+    }
+
+    @PostMapping("/etu/saves")
+    public String saves (Map<String, String> params ) {
+        String nom = params.get("nom");
+        String prenom = params.get("prenom");
+        return "Nom: " + nom + "</br>" +
+            " Prenom: " + prenom;
+    }
     
 }

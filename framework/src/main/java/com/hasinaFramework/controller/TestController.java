@@ -1,9 +1,10 @@
 package com.hasinaFramework.controller;
 
+import java.util.Map;
+
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
-import com.hasinaFramework.annotation.RequestParam;
-// import com.hasinaFramework.annotation.UrlServlet;
+// import com.hasinaFramework.annotation.PostMapping;
 
 @Controller
 public class TestController {
@@ -28,12 +29,13 @@ public class TestController {
     }
 
     @GetMapping("/hello/{id}")
-    public String helloWith(@RequestParam("id") int id){
+    public String helloWith(Map<String, String> params){
+        String id = params.get("id");
         return "hello " + id;
     }
 
-    @UrlServlet("/hello/{id}")
-    public String helloMethod(int id) {
-        return "Hello " + id;
-    }
+    // @UrlServlet("/hello/{id}")
+    // public String helloMethod(int id) {
+    //     return "Hello " + id;
+    // }
 }

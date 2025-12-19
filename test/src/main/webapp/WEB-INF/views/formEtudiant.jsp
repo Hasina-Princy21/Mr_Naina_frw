@@ -7,10 +7,14 @@
 </head>
 <body>
     <div class="container">
-        <form action="${pageContext.request.contextPath}/etu/save" method="post">
+        <form action="${pageContext.request.contextPath}/etu/saves" method="post">
             <div>
                 <label for="nom">Nom</label>
                 <input type="text" name="nom" id="nom" value="Hasina" required>
+            </div>
+            <div>
+                <label for="prenom">Prenom</label>
+                <input type="text" name="prenom" id="prenom" value="Princy" required>
             </div>
             <button type="submit">Valider</button>
         </form>
