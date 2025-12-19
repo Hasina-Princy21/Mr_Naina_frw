@@ -1,7 +1,6 @@
 package com.hasinaFramework.controller;
 
-import java.util.Map;
-
+import com.hasinaFramework.model.Etudiant;
 import com.hasinaFramework.ModelVue;
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
@@ -26,18 +25,11 @@ public class EtudiantController {
         return mv;
     }
 
-    @PostMapping("/etu/save")
-    public String save (Map<String, String> params) {
-        String nom = params.get("nom");
-        return "Nom: " + nom ;
-    }
-
     @PostMapping("/etu/saves")
-    public String saves (Map<String, String> params ) {
-        String nom = params.get("nom");
-        String prenom = params.get("prenom");
-        return "Nom: " + nom + "</br>" +
-            " Prenom: " + prenom;
+    public String save(Etudiant etudiant) {
+        return 
+            "Nom: " + etudiant.getNom() + 
+            ", Prenom: " + etudiant.getPrenom();
     }
     
 }

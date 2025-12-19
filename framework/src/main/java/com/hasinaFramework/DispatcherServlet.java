@@ -114,6 +114,45 @@ public class DispatcherServlet {
             // Instancier et invoquer la méthode avec la map
             Object instance = methodClassMapping.get(method).getDeclaredConstructor().newInstance();
             return method.invoke(instance, params);
+        } else if (method.getParameterCount() == 1) {
+            // Support pour binding d'objet (ex. Etudiant)
+            Class<?> clazz = method.getParameters()[0].getType();
+            Object beanInstance = clazz.getDeclaredConstructor().newInstance();
+
+            // Collecter les paramètres de chemin
+            String declaredPath = null;
+            for (String p : routes.keySet()) {
+                if (path.matches(convertToRegex(p))) {
+                    declaredPath = p;
+                    break;
+                }
+            }
+
+            if (declaredPath != null) {
+                String[] pathParts = path.split("/");
+                String[] declaredParts = declaredPath.split("/");
+
+                for (int i = 0; i < declaredParts.length && i < pathParts.length; i++) {
+                    if (declaredParts[i].startsWith("{")) {
+                        String name = declaredParts[i].substring(1, declaredParts[i].length() - 1);
+                        setField(beanInstance, clazz, name, pathParts[i]);
+                    }
+                }
+            }
+
+            // Collecter et binder les paramètres de requête
+            Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+                String name = paramNames.nextElement();
+                String value = request.getParameter(name);
+                // Supporter les noms avec préfixe comme "etudiant.nom" -> "nom"
+                String fieldName = name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : name;
+                setField(beanInstance, clazz, fieldName, value);
+            }
+
+            // Instancier le contrôleur et invoquer la méthode avec l'objet
+            Object controllerInstance = methodClassMapping.get(method).getDeclaredConstructor().newInstance();
+            return method.invoke(controllerInstance, beanInstance);
         } else {
             // Code existant pour les méthodes avec paramètres individuels
             Parameter[] parameters = method.getParameters();
@@ -223,18 +262,30 @@ public class DispatcherServlet {
         return false;
     }
 
+    private void setField(Object instance, Class<?> clazz, String fieldName, String value) {
+        try {
+            String setterName = "set" + capitalize(fieldName);
+            Method setter = clazz.getMethod(setterName, String.class);
+            setter.invoke(instance, value);
+        } catch (Exception e) {
+            // Ignorer si pas de setter ou erreur
+        }
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
     private Method findMethod(String path, String httpMethod) {
         for (Map.Entry<String, Map<String, Method>> entry : routes.entrySet()) {
-
             String declaredPath = entry.getKey();
             String regex = convertToRegex(declaredPath);
-
             if (path.matches(regex)) {
                 return entry.getValue().get(httpMethod);
             }
         }
         return null;
     }
-
 
 }
