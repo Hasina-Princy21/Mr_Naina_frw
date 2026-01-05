@@ -2,6 +2,7 @@ package com.hasinaFramework;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -10,11 +11,12 @@ import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
 import com.hasinaFramework.annotation.PostMapping;
 import com.hasinaFramework.annotation.RequestParam;
-// import com.hasinaFramework.annotation.UrlServlet;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Enumeration;
+import com.hasinaFramework.annotation.JsonResponse;
+
+import com.google.gson.Gson;
 
 
 public class DispatcherServlet {
@@ -113,7 +115,13 @@ public class DispatcherServlet {
 
             // Instancier et invoquer la méthode avec la map
             Object instance = methodClassMapping.get(method).getDeclaredConstructor().newInstance();
-            return method.invoke(instance, params);
+            Object result = method.invoke(instance, params);
+            if (method.isAnnotationPresent(JsonResponse.class)) {
+                Gson gson = new Gson();
+                return gson.toJson(result);
+            } else {
+                return result;
+            }
         } else if (method.getParameterCount() == 1) {
             // Support pour binding d'objet (ex. Etudiant)
             Class<?> clazz = method.getParameters()[0].getType();
@@ -152,7 +160,13 @@ public class DispatcherServlet {
 
             // Instancier le contrôleur et invoquer la méthode avec l'objet
             Object controllerInstance = methodClassMapping.get(method).getDeclaredConstructor().newInstance();
-            return method.invoke(controllerInstance, beanInstance);
+            Object result = method.invoke(controllerInstance, beanInstance);
+            if (method.isAnnotationPresent(JsonResponse.class)) {
+                Gson gson = new Gson();
+                return gson.toJson(result);
+            } else {
+                return result;
+            }
         } else {
             // Code existant pour les méthodes avec paramètres individuels
             Parameter[] parameters = method.getParameters();
@@ -206,7 +220,13 @@ public class DispatcherServlet {
                     .getDeclaredConstructor()
                     .newInstance();
 
-            return method.invoke(instance, args);
+            Object result = method.invoke(instance, args);
+            if (method.isAnnotationPresent(JsonResponse.class)) {
+                Gson gson = new Gson();
+                return gson.toJson(result);
+            } else {
+                return result;
+            }
         }
     }
 

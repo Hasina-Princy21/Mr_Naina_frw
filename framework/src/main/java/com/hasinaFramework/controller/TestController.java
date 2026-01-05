@@ -2,9 +2,11 @@ package com.hasinaFramework.controller;
 
 import java.util.Map;
 
+import com.hasinaFramework.ModelVue;
 import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
 // import com.hasinaFramework.annotation.PostMapping;
+import com.hasinaFramework.annotation.PostMapping;
 
 @Controller
 public class TestController {
@@ -32,6 +34,17 @@ public class TestController {
     public String helloWith(Map<String, String> params){
         String id = params.get("id");
         return "hello " + id;
+    }
+
+    @GetMapping("/upload")
+    public ModelVue upload (){
+        ModelVue v = new ModelVue("upload.jsp");
+        return v;
+    }
+
+    @PostMapping("/upload/save")
+    public String uploadSave (){
+        return "";
     }
 
     // @UrlServlet("/hello/{id}")
