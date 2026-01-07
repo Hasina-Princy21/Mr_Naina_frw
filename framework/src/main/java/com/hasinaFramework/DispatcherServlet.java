@@ -8,11 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import org.reflections.Reflections;
 import com.hasinaFramework.annotation.Controller;
+// import com.hasinaFramework.annotation.FileParam;
 import com.hasinaFramework.annotation.GetMapping;
 import com.hasinaFramework.annotation.PostMapping;
 import com.hasinaFramework.annotation.RequestParam;
+import com.hasinaFramework.util.UploadedFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import com.hasinaFramework.annotation.JsonResponse;
 
@@ -74,6 +77,25 @@ public class DispatcherServlet {
     public Object invoke(String path, HttpServletRequest request) throws Exception {
 
         String httpMethod = request.getMethod();
+        // Diagnostic: lister les parts si la requête est multipart
+        try {
+            String ct = request.getContentType();
+            if (ct != null && ct.toLowerCase().contains("multipart")) {
+                try {
+                    for (Part p : request.getParts()) {
+                        String sfn = p.getSubmittedFileName();
+                        System.out.println("[DEBUG multipart] part name=" + p.getName() +
+                                           ", submittedFileName=" + sfn +
+                                           ", size=" + p.getSize() +
+                                           ", contentType=" + p.getContentType());
+                    }
+                } catch (Exception e) {
+                    System.err.println("[DEBUG multipart] impossible de lister les parts: " + e.getMessage());
+                }
+            }
+        } catch (Throwable t) {
+            // Ne pas empêcher le traitement en cas d'erreur de debug
+        }
         Method method = findMethod(path, httpMethod);
 
         if (method == null) {
@@ -123,8 +145,56 @@ public class DispatcherServlet {
                 return result;
             }
         } else if (method.getParameterCount() == 1) {
-            // Support pour binding d'objet (ex. Etudiant)
-            Class<?> clazz = method.getParameters()[0].getType();
+            // Special-case: if the single parameter is an UploadedFile (or annotated with @RequestParam),
+            // bind it from the multipart Part instead of doing bean-binding.
+            java.lang.reflect.Parameter param = method.getParameters()[0];
+            Class<?> clazz = param.getType();
+
+            if (clazz == UploadedFile.class || param.isAnnotationPresent(RequestParam.class)) {
+                Object[] args = new Object[1];
+                RequestParam rp = param.getAnnotation(RequestParam.class);
+                if (clazz == UploadedFile.class && rp != null) {
+                    try {
+                        Part filePart = request.getPart(rp.value());
+                        if (filePart != null) {
+                            String submittedName = filePart.getSubmittedFileName();
+                            if (submittedName != null && !submittedName.trim().isEmpty()) {
+                                UploadedFile uploadedFile = new UploadedFile(
+                                    submittedName,
+                                    filePart.getContentType(),
+                                    filePart.getSize(),
+                                    filePart.getInputStream()
+                                );
+                                args[0] = uploadedFile;
+                            } else {
+                                System.out.println("Fichier présent mais nom vide pour param: " + rp.value());
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Erreur lors de l'extraction du fichier " + (rp != null ? rp.value() : "?") + ": " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else if (rp != null) {
+                    // Single non-upload parameter annotated with @RequestParam -> bind primitive/string
+                    String val = request.getParameter(rp.value());
+                    if (clazz == int.class || clazz == Integer.class) {
+                        args[0] = Integer.parseInt(val);
+                    } else {
+                        args[0] = val;
+                    }
+                }
+
+                Object controllerInstance = methodClassMapping.get(method).getDeclaredConstructor().newInstance();
+                Object result = method.invoke(controllerInstance, args);
+                if (method.isAnnotationPresent(JsonResponse.class)) {
+                    Gson gson = new Gson();
+                    return gson.toJson(result);
+                } else {
+                    return result;
+                }
+            }
+
+            // Otherwise fall back to bean-binding for a single complex object (e.g., Etudiant)
             Object beanInstance = clazz.getDeclaredConstructor().newInstance();
 
             // Collecter les paramètres de chemin
@@ -204,12 +274,42 @@ public class DispatcherServlet {
                 if (args[i] == null) {
                     RequestParam rp = parameters[i].getAnnotation(RequestParam.class);
                     if (rp != null) {
-                        String val = request.getParameter(rp.value());
-
-                        if (parameters[i].getType() == int.class || parameters[i].getType() == Integer.class) {
-                            args[i] = Integer.parseInt(val);
+                        // If parameter expects an UploadedFile, skip request.getParameter binding
+                        if (parameters[i].getType() == UploadedFile.class) {
+                            // attempt to bind file below
                         } else {
-                            args[i] = val;
+                            String val = request.getParameter(rp.value());
+
+                            if (parameters[i].getType() == int.class || parameters[i].getType() == Integer.class) {
+                                args[i] = Integer.parseInt(val);
+                            } else {
+                                args[i] = val;
+                            }
+                        }
+                    }
+
+                    // Support pour FileParam: bind UploadedFile even if a string param was present
+                    RequestParam fp = parameters[i].getAnnotation(RequestParam.class);
+                    if (fp != null && parameters[i].getType() == UploadedFile.class) {
+                        try {
+                            Part filePart = request.getPart(fp.value());
+                            if (filePart != null) {
+                                String submittedName = filePart.getSubmittedFileName();
+                                if (submittedName != null && !submittedName.trim().isEmpty()) {
+                                    UploadedFile uploadedFile = new UploadedFile(
+                                        submittedName,
+                                        filePart.getContentType(),
+                                        filePart.getSize(),
+                                        filePart.getInputStream()
+                                    );
+                                    args[i] = uploadedFile;
+                                } else {
+                                    System.out.println("Fichier présent mais nom vide pour param: " + fp.value());
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Erreur lors de l'extraction du fichier " + fp.value() + ": " + e.getMessage());
+                            e.printStackTrace();
                         }
                     }
                 }

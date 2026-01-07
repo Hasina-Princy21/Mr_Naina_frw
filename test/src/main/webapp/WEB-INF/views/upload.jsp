@@ -7,8 +7,9 @@
 </head>
 <body>
     <div class="container">
-        <form action="${pageContext.request.contextPath}/upload" method="post">
-            <input type="file" name="file" id="">
+        <form action="${pageContext.request.contextPath}/upload/save" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" required>
+            <button type="submit">Upload</button>
         </form>
     </div>
 </body>
