@@ -9,6 +9,7 @@
     <div class="container">
         <ul>
             <li><a href="${pageContext.request.contextPath}/upload">Faire un upload</a></li>
+            <li><a href="${pageContext.request.contextPath}/session">Session Demo</a></li>
         </ul>
     </div>
 </body>

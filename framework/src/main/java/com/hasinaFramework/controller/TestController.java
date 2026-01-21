@@ -10,6 +10,7 @@ import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
 import com.hasinaFramework.annotation.PostMapping;
 import com.hasinaFramework.annotation.RequestParam;
+import com.hasinaFramework.annotation.Session;
 import com.hasinaFramework.util.FileUploadUtil;
 import com.hasinaFramework.util.UploadedFile;
 
@@ -77,5 +78,38 @@ public class TestController {
             return "Erreur lors de l'upload: " + msg;
         }
     }
+
+    // Exemple d'utilisation de @Session
+    // @GetMapping("/session/get")
+    // public String setSession(@RequestParam("key") String key, 
+    //                         @RequestParam("value") String value, 
+    //                         @Session Map<String, Object> session) {
+    //     session.put(key, value);
+    //     return "Valeur '" + value + "' stockée dans la session avec la clé '" + key + "'";
+    // }
+
+    @GetMapping("/session")
+    public ModelVue sessionDemo() {
+        ModelVue v = new ModelVue("session.jsp");
+        return v;
+    }
+
+    @PostMapping("/session/get")
+    public String getSession(@RequestParam("value") String value, 
+                            @Session Map<String, Object> session) {
+        session.put("user", value);
+        return "Valeur pour ' user: ' " + session.get("user");
+    }
+
+    // @GetMapping("/session/counter")
+    // public String sessionCounter(@Session Map<String, Object> session) {
+    //     Integer counter = (Integer) session.get("counter");
+    //     if (counter == null) {
+    //         counter = 0;
+    //     }
+    //     counter++;
+    //     session.put("counter", counter);
+    //     return "Compteur de visites: " + counter;
+    // }
 }
 

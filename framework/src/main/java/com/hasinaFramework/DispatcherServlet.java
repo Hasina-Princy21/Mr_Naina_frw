@@ -12,9 +12,12 @@ import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
 import com.hasinaFramework.annotation.PostMapping;
 import com.hasinaFramework.annotation.RequestParam;
+import com.hasinaFramework.annotation.Session;
+import com.hasinaFramework.util.SessionContext;
 import com.hasinaFramework.util.UploadedFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import com.hasinaFramework.annotation.JsonResponse;
@@ -272,6 +275,13 @@ public class DispatcherServlet {
 
             for (int i = 0; i < parameters.length; i++) {
                 if (args[i] == null) {
+                    // Gérer l'annotation @Session
+                    if (parameters[i].isAnnotationPresent(Session.class)) {
+                        // args[i] = getSessionMap(request);
+                        args[i] = SessionContext.getSessionMap();
+                        continue;
+                    }
+
                     RequestParam rp = parameters[i].getAnnotation(RequestParam.class);
                     if (rp != null) {
                         // If parameter expects an UploadedFile, skip request.getParameter binding
@@ -330,12 +340,6 @@ public class DispatcherServlet {
         }
     }
 
-    
-
-    // public Method getMethod(String path){
-    //     return urlMapping.get(path);
-    // }
-
     public Method getMethod(String path) {
         for (Map.Entry<String, Method> entry : urlMapping.entrySet()) {
             String regex = convertToRegex(entry.getKey());
@@ -345,15 +349,6 @@ public class DispatcherServlet {
         }
         return null;
     }
-
-
-    // public Class<?> getClass(String path){
-    //     Method method = urlMapping.get(path);
-    //     if (method != null) {
-    //         return methodClassMapping.get(method);
-    //     }
-    //     return null;
-    // }
 
     public Class<?> getClass(String path) {
         for (Map.Entry<String, Method> entry : urlMapping.entrySet()) {
@@ -366,11 +361,6 @@ public class DispatcherServlet {
         }
         return null;
     }
-
-
-    // public boolean containsPath(String path) {
-    //     return urlMapping.containsKey(path);
-    // }
 
     public boolean containsPath(String path) {
         for (String declaredPath : routes.keySet()) {
@@ -407,5 +397,41 @@ public class DispatcherServlet {
         }
         return null;
     }
+
+    // private Map<String, Object> getSessionMap(HttpServletRequest request) {
+    //     HttpSession session = request.getSession();
+    //     return new HashMap<String, Object>() {
+    //         @Override
+    //         public Object put(String key, Object value) {
+    //             session.setAttribute(key, value);
+    //             return value;
+    //         }
+
+    //         @Override
+    //         public Object get(Object key) {
+    //             return session.getAttribute((String) key);
+    //         }
+
+    //         @Override
+    //         public Object remove(Object key) {
+    //             Object value = session.getAttribute((String) key);
+    //             session.removeAttribute((String) key);
+    //             return value;
+    //         }
+
+    //         @Override
+    //         public boolean containsKey(Object key) {
+    //             return session.getAttribute((String) key) != null;
+    //         }
+
+    //         @Override
+    //         public void clear() {
+    //             java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+    //             while (attributeNames.hasMoreElements()) {
+    //                 session.removeAttribute(attributeNames.nextElement());
+    //             }
+    //         }
+    //     };
+    // }
 
 }
