@@ -2,6 +2,15 @@
     <servlet>
         <servlet-name>FrontServlet</servlet-name>
         <servlet-class>com.hasinaFramework.FrontServlet</servlet-class>
+        <!-- Paramètre pour définir le nom de l'attribut de session à vérifier pour @Authorized -->
+        <init-param>
+            <param-name>sessionAttribute</param-name>
+            <param-value>user</param-value>
+        </init-param>
+        <init-param>
+            <param-name>roleAttribute</param-name>
+            <param-value>role</param-value>
+        </init-param>
         <multipart-config>
             <max-file-size>52428800</max-file-size><!-- 50MB -->
             <max-request-size>52428800</max-request-size><!-- 50MB -->

@@ -12,8 +12,9 @@ import com.hasinaFramework.annotation.Controller;
 import com.hasinaFramework.annotation.GetMapping;
 import com.hasinaFramework.annotation.PostMapping;
 import com.hasinaFramework.annotation.RequestParam;
+import com.hasinaFramework.annotation.Role;
 import com.hasinaFramework.annotation.Session;
-import com.hasinaFramework.util.SessionContext;
+import com.hasinaFramework.annotation.Authorized;
 import com.hasinaFramework.util.UploadedFile;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,8 +31,13 @@ public class DispatcherServlet {
     private final Map<String, Method> urlMapping = new HashMap<>();
     private final Map<Method, Class<?>> methodClassMapping = new HashMap<>();
     private final Map<String, Map<String, Method>> routes = new HashMap<>();
+    // Nom de l'attribut de session à vérifier pour @Authorized (défini dans web.xml)
+    private final String sessionAttributeName;
+    private final String roleAttributeName;
 
-    public DispatcherServlet(String packageName) throws Exception {
+    public DispatcherServlet(String packageName, String sessionAttributeName, String roleAttributeName) throws Exception {
+        this.sessionAttributeName = sessionAttributeName != null ? sessionAttributeName : "user";
+        this.roleAttributeName = roleAttributeName != null ? roleAttributeName : "role";
         scanControllers(packageName);
     }
 
@@ -76,10 +82,37 @@ public class DispatcherServlet {
         }
     }
 
-
+    // invok Authorized
     public Object invoke(String path, HttpServletRequest request) throws Exception {
 
         String httpMethod = request.getMethod();
+        // Vérification de l'annotation @Authorized
+        // Si la méthode est annotée avec @Authorized, l'utilisateur doit être connecté
+        // Le nom de l'attribut à vérifier est défini dans web.xml (paramètre sessionAttribute)
+        Method method = findMethod(path, httpMethod);
+        if (method != null && method.isAnnotationPresent(Authorized.class)) {
+            HttpSession session = request.getSession(false);
+            // Vérifier si l'utilisateur est connecté (présence de l'attribut de session)
+            if (session == null || session.getAttribute(sessionAttributeName) == null) {
+                // L'utilisateur n'est pas connecté, retourner 404 (accès refusé)
+                return null;
+            }
+            // L'utilisateur est connecté, continuer le traitement normal
+        }
+        // Vérification de l'annotation @Role
+        // Si la méthode a @Role, vérifier que le rôle de l'utilisateur correspond
+        if (method != null && method.isAnnotationPresent(Role.class)) {
+            Role roleAnnotation = method.getAnnotation(Role.class);
+            String requiredRole = roleAnnotation.value(); // ex: "admin"
+            
+            HttpSession session = request.getSession(false);
+            String userRole = (session != null) ? (String) session.getAttribute(roleAttributeName) : null;
+            
+            // Si le rôle ne correspond pas, retourner 404 (accès refusé)
+            if (userRole == null || !userRole.equals(requiredRole)) {
+                return null;
+            }
+        }
         // Diagnostic: lister les parts si la requête est multipart
         try {
             String ct = request.getContentType();
@@ -99,7 +132,6 @@ public class DispatcherServlet {
         } catch (Throwable t) {
             // Ne pas empêcher le traitement en cas d'erreur de debug
         }
-        Method method = findMethod(path, httpMethod);
 
         if (method == null) {
             return null; 
@@ -277,8 +309,8 @@ public class DispatcherServlet {
                 if (args[i] == null) {
                     // Gérer l'annotation @Session
                     if (parameters[i].isAnnotationPresent(Session.class)) {
-                        // args[i] = getSessionMap(request);
-                        args[i] = SessionContext.getSessionMap();
+                        args[i] = getSessionMap(request);
+                        // args[i] = SessionContext.getSessionMap();
                         continue;
                     }
 
@@ -398,40 +430,40 @@ public class DispatcherServlet {
         return null;
     }
 
-    // private Map<String, Object> getSessionMap(HttpServletRequest request) {
-    //     HttpSession session = request.getSession();
-    //     return new HashMap<String, Object>() {
-    //         @Override
-    //         public Object put(String key, Object value) {
-    //             session.setAttribute(key, value);
-    //             return value;
-    //         }
+    private Map<String, Object> getSessionMap(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        return new HashMap<String, Object>() {
+            @Override
+            public Object put(String key, Object value) {
+                session.setAttribute(key, value);
+                return value;
+            }
 
-    //         @Override
-    //         public Object get(Object key) {
-    //             return session.getAttribute((String) key);
-    //         }
+            @Override
+            public Object get(Object key) {
+                return session.getAttribute((String) key);
+            }
 
-    //         @Override
-    //         public Object remove(Object key) {
-    //             Object value = session.getAttribute((String) key);
-    //             session.removeAttribute((String) key);
-    //             return value;
-    //         }
+            @Override
+            public Object remove(Object key) {
+                Object value = session.getAttribute((String) key);
+                session.removeAttribute((String) key);
+                return value;
+            }
 
-    //         @Override
-    //         public boolean containsKey(Object key) {
-    //             return session.getAttribute((String) key) != null;
-    //         }
+            @Override
+            public boolean containsKey(Object key) {
+                return session.getAttribute((String) key) != null;
+            }
 
-    //         @Override
-    //         public void clear() {
-    //             java.util.Enumeration<String> attributeNames = session.getAttributeNames();
-    //             while (attributeNames.hasMoreElements()) {
-    //                 session.removeAttribute(attributeNames.nextElement());
-    //             }
-    //         }
-    //     };
-    // }
+            @Override
+            public void clear() {
+                java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+                while (attributeNames.hasMoreElements()) {
+                    session.removeAttribute(attributeNames.nextElement());
+                }
+            }
+        };
+    }
 
 }
