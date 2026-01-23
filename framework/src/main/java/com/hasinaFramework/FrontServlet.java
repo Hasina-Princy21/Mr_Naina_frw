@@ -10,11 +10,23 @@ import jakarta.servlet.http.HttpServletResponse;
 public class FrontServlet extends HttpServlet {
 
     private DispatcherServlet dispatcherServlet;
+    private String sessionAttribute; // Nom de l'attribut de session à vérifier pour @Authorized
+    private String roleAttribute;
 
     @Override
     public void init() throws ServletException {
         try {
-            dispatcherServlet = new DispatcherServlet("com.hasinaFramework.controller");
+            // Récupérer le nom de l'attribut de session depuis web.xml
+            sessionAttribute = getInitParameter("sessionAttribute");
+            if (sessionAttribute == null || sessionAttribute.trim().isEmpty()) {
+                sessionAttribute = "user"; // Valeur par défaut
+            }
+            roleAttribute = getInitParameter("roleAttribute");
+            if (roleAttribute == null || roleAttribute.trim().isEmpty()) {
+                roleAttribute = "role"; // Valeur par défaut
+            }
+            dispatcherServlet = new DispatcherServlet("com.hasinaFramework.controller", 
+                                               sessionAttribute, roleAttribute);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize DispatcherServlet", e);
         }

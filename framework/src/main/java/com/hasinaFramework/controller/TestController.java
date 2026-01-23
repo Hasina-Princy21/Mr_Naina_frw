@@ -17,7 +17,7 @@ import com.hasinaFramework.util.UploadedFile;
 @Controller
 public class TestController {
 
-    @GetMapping("/")
+    @GetMapping("/home")
     public ModelVue home(){
         ModelVue v = new ModelVue("home.jsp");
         return v;

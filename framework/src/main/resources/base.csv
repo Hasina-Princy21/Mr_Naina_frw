@@ -1,0 +1,6 @@
+id;email;password;role
+1;hasina+1admin@gmail.com;hasina1;admin
+1;hasina+1user@gmail.com;hasina1;user
+2;hasina+2@gmail.com;hasina2;user
+3;hasina+3@gmail.com;hasina3;user
+4;hasina+4@gmail.com;hasina4;user
